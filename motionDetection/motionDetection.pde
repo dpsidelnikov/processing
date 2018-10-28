@@ -1,38 +1,46 @@
 // Tutorial by Daniel Shiffman
-// https://youtu.be/nCVZHROb_dE
+// https://youtu.be/QLHMtE5XsMs
 
 // import video library
 import processing.video.*;
 
 // Call Capture objects as video
 Capture video;
-PImage p
+PImage prev;
 
 // Set global variables
-color trackColor;
 float threshold = 25;
+
+float motionX = 0;
+float motionY = 0;
+
+float lerpX = 0;
+float lerpY = 0;
 
 void setup(){
         // Create a canvas
-        size(640, 360);
+        size(640, 480);
+        // pixelDensity(2);
         // Identiy cameras
         String[] cameras = Capture.list();
         printArray(cameras);
         // Initialise and start video capture
         video = new Capture(this, width,height);
         video.start();
-        // Asign trackColor value
-        trackColor = color(255, 0, 0);
+        prev = createImage(width,height,RGB);
 }
 
 // Capture images when they exist
 void captureEvent(Capture video) {
+        prev.copy(video,0,0,video.width,video.height,0,0,prev.width,prev.height);
+        prev.updatePixels();
         video.read();
 }
 
 void draw(){
         // Load pixels array
         video.loadPixels();
+        prev.loadPixels();
         // Show video
         image(video,0,0);
 
@@ -43,6 +51,7 @@ void draw(){
         int count = 0;
 
         // Loop thought every pixel
+        loadPixels();
         for (int x = 0; x < video.width; x++) {
                 for (int y = 0; y < video.height; y++) {
                         // Identify by it's coordinates
@@ -52,33 +61,43 @@ void draw(){
                         float r1 = red(currentColor);
                         float g1 = green(currentColor);
                         float b1 = blue(currentColor);
-                        float r2 = red(trackColor);
-                        float g2 = green(trackColor);
-                        float b2 = blue(trackColor);
+                        //Get previous color
+                        color prevColor = prev.pixels[loc];
+                        float r2 = red(prevColor);
+                        float g2 = green(prevColor);
+                        float b2 = blue(prevColor);
 
                         // Compare pixel color
                         float d = distSq(r1, g1, b1, r2, g2, b2);
                         // If it's different enough store in avg
-                        if (d < threshold*threshold) {
-                                stroke(255);
-                                strokeWeight(1);
-                                point(x, y);
+                        if (d > threshold*threshold) {
                                 avgX += x;
                                 avgY += y;
                                 count++;
+                                // pixels[loc] = color(255);
+                        } else {
+                                // pixels[loc] = color(0);
                         }
+
                 }
         }
+        // updatePixels();
         // Get the average pixel position
-        if (count > 0) {
-                avgX = avgX / count;
-                avgY = avgY / count;
-                // Draw an ellipse
-                fill(trackColor);
-                strokeWeight(4.0);
-                stroke(0);
-                ellipse(avgX, avgY, 24, 24);
+        if (count > 200) {
+                motionX = avgX / count;
+                motionY = avgY / count;
         }
+        // Do a linear interpolation to smooth the movement
+        lerpX = lerp(lerpX,motionX,0.1);
+        lerpY = lerp(lerpY,motionY,0.1);
+        // Draw an ellipse
+        fill(255,0,255);
+        strokeWeight(4.0);
+        stroke(0);
+        ellipse(lerpX, lerpY, 24, 24);
+
+        // image(video,0,0,100,100);
+        // image(prev,100,100,100,0);
 }
 
 // Distance square function is faster than dist()
@@ -88,7 +107,5 @@ float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
 }
 
 void mousePressed() {
-        // Choose certain pixel color to track
-        int loc = mouseX + mouseY*video.width;
-        trackColor = video.pixels[loc];
+
 }
