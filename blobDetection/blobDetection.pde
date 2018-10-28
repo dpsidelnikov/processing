@@ -1,5 +1,5 @@
 // Tutorial by Daniel Shiffman
-// https://youtu.be/nCVZHROb_dE
+// https://youtu.be/ce-2l2wRqO8
 
 // import video library
 import processing.video.*;
@@ -10,6 +10,10 @@ Capture video;
 // Set global variables
 color trackColor;
 float threshold = 25;
+float distThreshold = 25;
+
+// Create an ArrayList for Blobs
+ArrayList<Blob> blobs = new ArrayList<Blob>();
 
 void setup(){
         // Create a canvas
@@ -29,18 +33,25 @@ void captureEvent(Capture video) {
         video.read();
 }
 
+void keyPress(){
+        if (key == 'a') {
+                distThreshold++;
+        } else if (key == 'z') {
+                distThreshold--;
+        }
+        println(distThreshold);
+}
+
 void draw(){
         // Load pixels array
         video.loadPixels();
         // Show video
         image(video,0,0);
 
+        blobs.clear();
+
         // Set some local variables
         threshold = 25;
-        float avgX = 0;
-        float avgY = 0;
-        int count = 0;
-
 
         // Loop thought every pixel
         for (int x = 0; x < video.width; x++) {
@@ -58,32 +69,39 @@ void draw(){
 
                         // Compare pixel color
                         float d = distSq(r1, g1, b1, r2, g2, b2);
-                        // If it's different
+                        // If it's different enough store in avg
                         if (d < threshold*threshold) {
-                                stroke(255);
-                                strokeWeight(1);
-                                point(x, y);
-                                avgX += x;
-                                avgY += y;
-                                count++;
+                                boolean found = false;
+                                for (Blob b : blobs) {
+                                        if (b.isNear(x,y)) {
+                                                b.add(x,y);
+                                                found = true;
+                                                break;
+                                        }
+                                }
+                                if (!found) {
+                                        Blob b = new Blob(x,y);
+                                        blobs.add(b);
+                                }
                         }
                 }
         }
-        // Get the average pixel position
-        if (count > 0) {
-                avgX = avgX / count;
-                avgY = avgY / count;
-                // Draw an ellipse
-                fill(trackColor);
-                strokeWeight(4.0);
-                stroke(0);
-                ellipse(avgX, avgY, 24, 24);
+        for (Blob b : blobs) {
+          if(b.size() > 100) {
+                            b.show();
+                          }
+          }
+
         }
 }
 
 // Distance square function is faster than dist()
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
         float d = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) +(z2-z1)*(z2-z1);
+        return d;
+}
+float distSq(float x1, float y1, float x2, float y2) {
+        float d = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1);
         return d;
 }
 
