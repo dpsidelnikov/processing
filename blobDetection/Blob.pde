@@ -23,6 +23,7 @@ void show() {
         rect(minx, miny, maxx, maxy);
 }
 
+// This functions describes blobs's corners
 void add(float x, float y) {
         minx = min(minx, x);
         miny = min(miny, y);
@@ -30,10 +31,12 @@ void add(float x, float y) {
         maxy = max(maxy, y);
 }
 
+// Gets blobs size
 float size() {
         return (maxx-minx)*(maxy-miny);
 }
 
+// Check if a pixel is close enought to count as a part of a blob
 boolean isNear(float x, float y) {
         float cx = (minx + maxx) / 2;
         float cy = (miny + maxy) / 2;
