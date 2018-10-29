@@ -33,7 +33,7 @@ void captureEvent(Capture video) {
         video.read();
 }
 
-void keyPress(){
+void keyPressed(){
         if (key == 'a') {
                 distThreshold++;
         } else if (key == 'z') {
@@ -51,7 +51,7 @@ void draw(){
         blobs.clear();
 
         // Set some local variables
-        threshold = 25;
+        threshold = 80;
 
         // Loop thought every pixel
         for (int x = 0; x < video.width; x++) {
@@ -71,29 +71,29 @@ void draw(){
                         float d = distSq(r1, g1, b1, r2, g2, b2);
                         // If it's different enough store in avg
                         if (d < threshold*threshold) {
+
                                 boolean found = false;
                                 for (Blob b : blobs) {
-                                        if (b.isNear(x,y)) {
-                                                b.add(x,y);
+                                        if (b.isNear(x, y)) {
+                                                b.add(x, y);
                                                 found = true;
                                                 break;
                                         }
                                 }
                                 if (!found) {
-                                        Blob b = new Blob(x,y);
+                                        Blob b = new Blob(x, y);
                                         blobs.add(b);
                                 }
                         }
                 }
         }
         for (Blob b : blobs) {
-          if(b.size() > 100) {
-                            b.show();
-                          }
-          }
-
+                if (b.size() > 500) {
+                        b.show();
+                }
         }
 }
+
 
 // Distance square function is faster than dist()
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
