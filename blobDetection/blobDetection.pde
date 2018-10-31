@@ -39,7 +39,11 @@ void keyPressed(){
         } else if (key == 'z') {
                 distThreshold--;
         }
-        println(distThreshold);
+        if (key == 's') {
+                threshold++;
+        } else if (key == 'x') {
+                threshold--;
+        }
 }
 
 void draw(){
@@ -51,7 +55,7 @@ void draw(){
         blobs.clear();
 
         // Set some local variables
-        threshold = 80;
+        // threshold = 80;
 
         // Loop thought every pixel
         for (int x = 0; x < video.width; x++) {
@@ -92,8 +96,14 @@ void draw(){
                         b.show();
                 }
         }
+        dashboard();
 }
-
+void dashboard(){
+        textSize(10);
+        fill(255);
+        text("Distance threshold: " + distThreshold,15,25);
+        text("Color threshold: " + threshold,15,38);
+}
 
 // Distance square function is faster than dist()
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
