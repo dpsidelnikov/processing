@@ -134,7 +134,6 @@ void draw(){
                         }
                 }
         } else if (blobs.size() > currentBlobs.size()) {
-
                 for (Blob b : blobs) {
                         b.taken = false;
                 }
@@ -153,6 +152,7 @@ void draw(){
                         }
                         if (matched != null) {
                                 matched.taken = true;
+                                matched.lifespan = 255;
                                 matched.become(cb);
                         }
 
@@ -160,7 +160,10 @@ void draw(){
                 for (int i = blobs.size() - 1; i >= 0; i--) {
                         Blob b = blobs.get(i);
                         if (!b.taken) {
-                                blobs.remove(i);
+                                if (b.checkLife()) {
+                                        blobs.remove(i);
+                                };
+
                         }
                 }
         }
